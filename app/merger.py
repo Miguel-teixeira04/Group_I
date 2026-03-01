@@ -22,7 +22,7 @@ def merge_world_with_data(world: gpd.GeoDataFrame, df: pd.DataFrame) -> gpd.GeoD
     df = df.copy()
     df["Code"] = df["Code"].astype(str).str.strip()
     df = df[df["Code"].str.len() == 3]
-    df = df[~df["Code"].str.startswith("OWID_")]
+    df = df[df["Code"].str.startswith("OWID_")]
 
     merged = world.merge(df, how="left", left_on="ISO_A3", right_on="Code")
     print(type(merged))
