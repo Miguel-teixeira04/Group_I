@@ -1,6 +1,6 @@
 import os, requests
 
-def download_datasets(download_dir: str='download') -> None:
+def download_datasets(download_dir: str='downloads') -> None:
     owid_datasets = {
         "annual_change_forest_area.csv": "annual-change-forest-area",
         "annual_deforestation.csv": "annual-deforestation",
