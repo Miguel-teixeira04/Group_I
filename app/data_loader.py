@@ -10,6 +10,15 @@ def download_datasets(download_dir: str='downloads') -> None:
     """
     Downloads datasets from Our World in Data and a world map shapefile,
     saving them to the specified directory.
+
+    - `download_dir`: Directory to save the downloaded files. Defaults to 'downloads'.
+    - Downloads the following datasets:
+        - annual_change_forest_area.csv
+        - annual_deforestation.csv
+        - share_protected_land.csv
+        - share_degraded_land.csv
+        - share_covered_forest_land.csv
+    - Downloads the world map shapefile from Natural Earth.
     """
 
     owid_datasets = {
