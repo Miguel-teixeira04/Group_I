@@ -33,8 +33,3 @@ def merge_dataframes(geopd: gpd.GeoDataFrame, df: pd.DataFrame) -> gpd.GeoDataFr
     print(type(merged))
     return merged
 
-# Example usage:
-world_geopd = gpd.read_file(".../downloads/ne_110m_admin_0_countries.zip")
-annual_forest_df = pd.read_csv(".../downloads/annual_change_forest_area.csv")
-test = merge_dataframes(world_geopd, annual_forest_df)
-print(test.head())
