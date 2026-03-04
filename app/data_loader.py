@@ -1,6 +1,17 @@
-import os, requests
+"""
+Provides a function to download datasets from Our World in Data
+and a world map shapefile, saving them to a specified directory.
+"""
+
+import os
+import requests
 
 def download_datasets(download_dir: str='downloads') -> None:
+    """
+    Downloads datasets from Our World in Data and a world map shapefile,
+    saving them to the specified directory.
+    """
+
     owid_datasets = {
         "annual_change_forest_area.csv": "annual-change-forest-area",
         "annual_deforestation.csv": "annual-deforestation",
@@ -17,14 +28,13 @@ def download_datasets(download_dir: str='downloads') -> None:
         file_path = os.path.join(download_dir, filename)
         with open(file_path, "wb") as file:
             file.write(response.content)
-            
     map_url = "https://naciscdn.org/naturalearth/110m/cultural/ne_110m_admin_0_countries.zip"
     response = requests.get(map_url, timeout=10)
     response.raise_for_status()
-    
     map_path = os.path.join(download_dir, "ne_110m_admin_0_countries.zip")
     with open(map_path, "wb") as file:
         file.write(response.content)
 
+# Example usage:
 if __name__ == "__main__":
     download_datasets()
