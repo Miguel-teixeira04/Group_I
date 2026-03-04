@@ -27,9 +27,9 @@ def merge_dataframes(geopd: gpd.GeoDataFrame, df: pd.DataFrame) -> gpd.GeoDataFr
     df = df.copy()
     df["Code"] = df["Code"].astype(str).str.strip()
     df = df[df["Code"].str.len() == 3]
-    df = df[df["Code"].str.startswith("OWID_")]
+    df = df[~df["Code"].str.startswith("OWID_")]
 
-    merged = geopd.merge(geopd, df, how="left", left_on="ISO_A3", right_on="Code")
+    merged = geopd.merge(df, how="left", left_on="ISO_A3", right_on="Code")
     print(type(merged))
     return merged
 
