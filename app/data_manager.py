@@ -8,8 +8,8 @@ import os
 import geopandas as gpd
 import pandas as pd
 
-from data_loader import download_datasets
-from merger import merge_dataframes
+from .data_loader import download_datasets
+from .merger import merge_dataframes
 
 MAP_FILENAME: str = "ne_110m_admin_0_countries.zip"
 
@@ -60,7 +60,7 @@ class OkavangoData:
         """
         Initializes OkavangoData: downloads datasets and builds merged GeoDataFrames
         using only the most recent year available in each dataset.
-        
+
         - `download_dir`: Directory to save downloaded files. Defaults to 'downloads'.
         """
         self.download_dir = download_dir
@@ -100,4 +100,3 @@ class OkavangoData:
         df = pd.read_csv(file_path)
         df_recent = filter_most_recent(df)
         return merge_dataframes(self.world, df_recent)
-

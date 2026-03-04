@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 
+from app.data_manager import OkavangoData
 from app.merger import merge_dataframes
 
 
@@ -20,16 +21,9 @@ DATASET_FILES = {
 }
 
 
-def _import_okavango_class():
-    from app.data_manager import OkavangoData
-
-    return OkavangoData
-
-
 @st.cache_resource
 def get_app_data_manager():
-    okavango_class = _import_okavango_class()
-    return okavango_class()
+    return OkavangoData()
 
 
 @st.cache_data
