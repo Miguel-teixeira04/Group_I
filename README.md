@@ -3,10 +3,10 @@ ADPRO Group Project
 
 ## Team
 
-Guilherme Morgado ()
-Isaac Carvalho    ()
+Guilherme Morgado (56857)
+Isaac Carvalho    (57045)
 Matilde Ferreira  (56599)
-Miguel Teixeira   ()
+Miguel Teixeira   (56529)
 
 
 ## How to Run the App
