@@ -1,0 +1,29 @@
+# ─────────────────────────────────────────────
+# models.yaml  –  AI workflow configuration
+# Read by the Streamlit app to configure Ollama
+# ─────────────────────────────────────────────
+
+# Model used to DESCRIBE the satellite image
+image_model:
+  name: "llava:7b"
+  prompt: >
+    Describe this satellite image in detail. Focus on land cover,
+    vegetation, water bodies, urban areas, deforestation, and any
+    visible signs of environmental change.
+  temperature: 0.3
+  max_tokens: 512
+
+# Model used to ASSESS environmental risk from the description
+text_model:
+  name: "mistral:7b"
+  prompt: >
+    You are an environmental analyst. Given the following satellite
+    image description, determine whether the area is at environmental
+    risk. Consider deforestation, soil erosion, water pollution,
+    urban sprawl, loss of biodiversity, and any other factors.
+    Answer with a JSON object containing exactly two keys:
+      "danger" – either "Y" or "N"
+      "justification" – a short explanation (1-3 sentences).
+    Return ONLY the JSON object, no extra text.
+  temperature: 0.2
+  max_tokens: 256
