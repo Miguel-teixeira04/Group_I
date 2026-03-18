@@ -1,9 +1,8 @@
-# ─────────────────────────────────────────────
-# models.yaml  –  AI workflow configuration
-# Read by the Streamlit app to configure Ollama
-# ─────────────────────────────────────────────
+
 
 # Model used to DESCRIBE the satellite image
+
+#We set a low temperature sow the there isn't too much creativity or allucinations in the description
 image_model:
   name: "llava:7b"
   prompt: >
