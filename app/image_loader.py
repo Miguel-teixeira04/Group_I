@@ -1,6 +1,10 @@
 import os
 import math
 import requests
+from pathlib import Path
+
+# Project root (one level up from app/)
+_ROOT = Path(__file__).resolve().parent.parent
 
 # --- Tile math ---
 def lat_lon_to_tile(lat, lon, zoom):
@@ -10,9 +14,10 @@ def lat_lon_to_tile(lat, lon, zoom):
     return x, y, zoom
 
 # --- Path builder (creates folder if needed) ---
-def get_image_path(x, y, z, folder="images"):
-    os.makedirs(folder, exist_ok=True)   # ← here, and only here
-    return os.path.join(folder, f"esri_{z}_{x}_{y}.png")
+def get_image_path(x, y, z):
+    folder = _ROOT / "images"
+    os.makedirs(folder, exist_ok=True)
+    return str(folder / f"esri_{z}_{x}_{y}.png")
 
 # --- Main function your app calls ---
 def get_esri_tile(lat, lon, zoom=17):
