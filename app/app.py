@@ -22,6 +22,38 @@ DATASET_FILES = {
     "Share of Forest-Covered Land": "share_covered_forest_land.csv",
 }
 
+_CSS = """
+<style>
+    .block-container { padding-top: 1.2rem; padding-bottom: 1rem; }
+
+    /* Metric cards */
+    [data-testid="metric-container"] {
+        background: #f0fdf4;
+        border-left: 4px solid #16a34a;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+    }
+
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background: #f0fdf4;
+        border-right: 1px solid #bbf7d0;
+    }
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {
+        color: #14532d;
+    }
+
+    /* Page title */
+    h1 { color: #14532d; letter-spacing: -0.5px; }
+    h2, h3 { color: #166534; }
+
+    /* Divider */
+    hr { border-color: #d1fae5; margin: 1rem 0; }
+</style>
+"""
+
 
 @st.cache_resource
 def get_app_data_manager():
@@ -40,29 +72,23 @@ def _dataset_options() -> Dict[str, str]:
 def _available_years(df: pd.DataFrame, metric_column: str | None) -> list[int]:
     if "Year" not in df.columns:
         return []
-
     work_df = df.copy()
     if metric_column and metric_column in work_df.columns:
         work_df[metric_column] = pd.to_numeric(work_df[metric_column], errors="coerce")
         work_df = work_df[work_df[metric_column].notna()]
-
     years = pd.to_numeric(work_df["Year"], errors="coerce").dropna().astype(int)
     return sorted(years.unique().tolist(), reverse=True)
 
 
 def _choose_dataset_metric(raw_df: pd.DataFrame) -> str | None:
     numeric_columns = [
-        column
-        for column in raw_df.columns
-        if pd.api.types.is_numeric_dtype(raw_df[column]) and column != "Year"
+        c for c in raw_df.columns
+        if pd.api.types.is_numeric_dtype(raw_df[c]) and c != "Year"
     ]
     if numeric_columns:
         return numeric_columns[-1]
-
-    fallback_numeric = [
-        column for column in raw_df.columns if pd.api.types.is_numeric_dtype(raw_df[column])
-    ]
-    return fallback_numeric[0] if fallback_numeric else None
+    fallback = [c for c in raw_df.columns if pd.api.types.is_numeric_dtype(raw_df[c])]
+    return fallback[0] if fallback else None
 
 
 def _build_map_dataframe(
@@ -79,18 +105,10 @@ def _build_map_dataframe(
 
 def _country_column(df: pd.DataFrame) -> str:
     candidates = ["ADMIN", "Name", "NAME", "Entity", "Country", "ISO_A3"]
-    for column in candidates:
-        if column in df.columns:
-            return column
+    for c in candidates:
+        if c in df.columns:
+            return c
     return "ISO_A3" if "ISO_A3" in df.columns else df.columns[0]
-
-
-def _numeric_columns(df: pd.DataFrame) -> list[str]:
-    return [
-        column
-        for column in df.columns
-        if pd.api.types.is_numeric_dtype(df[column]) and column != "geometry"
-    ]
 
 
 def _series_for_insights(
@@ -107,32 +125,24 @@ def _series_for_insights(
         work_df["Year"] = pd.to_numeric(work_df["Year"], errors="coerce")
         valid_years = sorted(work_df["Year"].dropna().unique())
         if len(valid_years) >= 2:
-            previous_year = valid_years[-2]
-            latest_year = valid_years[-1]
+            prev_year = valid_years[-2]
+            last_year = valid_years[-1]
             pivot = (
-                work_df[work_df["Year"].isin([previous_year, latest_year])]
+                work_df[work_df["Year"].isin([prev_year, last_year])]
                 .dropna(subset=[country_column, metric_column])
-                .pivot_table(
-                    index=country_column,
-                    columns="Year",
-                    values=metric_column,
-                    aggfunc="mean",
-                )
+                .pivot_table(index=country_column, columns="Year",
+                             values=metric_column, aggfunc="mean")
             )
-            if previous_year in pivot.columns and latest_year in pivot.columns:
-                series = (pivot[latest_year] - pivot[previous_year]).dropna()
+            if prev_year in pivot.columns and last_year in pivot.columns:
+                series = (pivot[last_year] - pivot[prev_year]).dropna()
                 if not series.empty:
-                    label = (
-                        f"Annual Change in {metric_column} "
-                        f"({int(previous_year)} to {int(latest_year)})"
-                    )
+                    label = (f"Annual Change in {metric_column} "
+                             f"({int(prev_year)} → {int(last_year)})")
                     return series, label
 
     series = (
         work_df.dropna(subset=[country_column, metric_column])
-        .groupby(country_column)[metric_column]
-        .mean()
-        .dropna()
+        .groupby(country_column)[metric_column].mean().dropna()
     )
     return series, metric_column
 
@@ -141,112 +151,150 @@ def _format_number(value: float) -> str:
     return f"{value:,.2f}"
 
 
+def _apply_chart_style(fig: plt.Figure, *axes: plt.Axes) -> None:
+    """Apply consistent clean styling to matplotlib figures."""
+    fig.patch.set_facecolor("white")
+    for ax in axes:
+        ax.set_facecolor("#f9fafb")
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_color("#d1d5db")
+        ax.spines["bottom"].set_color("#d1d5db")
+        ax.tick_params(colors="#4b5563", labelsize=9)
+        ax.xaxis.label.set_color("#374151")
+        ax.yaxis.label.set_color("#374151")
+        ax.title.set_color("#111827")
+        ax.title.set_fontsize(11)
+        ax.title.set_fontweight("bold")
+        ax.grid(axis="x", color="#e5e7eb", linewidth=0.8, linestyle="--")
+        ax.set_axisbelow(True)
+
+
 def _plot_map(df: gpd.GeoDataFrame, metric_column: str | None) -> None:
-    fig, axis = plt.subplots(figsize=(11, 6))
+    fig, axis = plt.subplots(figsize=(12, 6), facecolor="white")
+    axis.set_facecolor("#dbeafe")  # light ocean blue
+
     if metric_column and metric_column in df.columns and df[metric_column].notna().any():
         df.plot(
             column=metric_column,
             cmap="YlGn",
             legend=True,
             ax=axis,
-            edgecolor="#6b7280",
-            linewidth=0.25,
-            missing_kwds={"color": "#d9d9d9", "label": "No data"},
+            edgecolor="#9ca3af",
+            linewidth=0.2,
+            missing_kwds={"color": "#e5e7eb", "label": "No data"},
+            legend_kwds={"shrink": 0.6, "label": metric_column},
         )
     else:
-        df.plot(ax=axis, edgecolor="#666666", linewidth=0.2, color="#d9d9d9")
+        df.plot(ax=axis, edgecolor="#9ca3af", linewidth=0.2, color="#d1fae5")
+
     axis.set_axis_off()
-    st.pyplot(fig, width="stretch")
+    fig.tight_layout(pad=0)
+    st.pyplot(fig)
+    plt.close(fig)
 
 
 def _plot_top_bottom_chart(series: pd.Series, metric_label: str) -> None:
     top_5 = series.nlargest(5).sort_values(ascending=True)
-    bottom_5 = series.nsmallest(5)
+    bottom_5 = series.nsmallest(5).sort_values(ascending=True)
 
-    fig, (axis_left, axis_right) = plt.subplots(1, 2, figsize=(14, 5))
+    fig, (ax_left, ax_right) = plt.subplots(1, 2, figsize=(14, 5))
+    _apply_chart_style(fig, ax_left, ax_right)
 
-    top_colors = plt.cm.Greens([0.55, 0.62, 0.70, 0.78, 0.86])[-len(top_5):]
-    bottom_colors = plt.cm.Greens([0.28, 0.34, 0.40, 0.46, 0.52])[-len(bottom_5):]
+    green_shades = ["#bbf7d0", "#86efac", "#4ade80", "#22c55e", "#16a34a"]
+    red_shades   = ["#fecaca", "#fca5a5", "#f87171", "#ef4444", "#dc2626"]
 
-    top_5.plot(kind="barh", ax=axis_left, title="Top 5 Countries", color=top_colors)
-    bottom_5.plot(
-        kind="barh",
-        ax=axis_right,
-        title="Bottom 5 Countries",
-        color=bottom_colors,
-    )
+    top_5.plot(kind="barh", ax=ax_left, color=green_shades[-len(top_5):])
+    bottom_5.plot(kind="barh", ax=ax_right, color=red_shades[:len(bottom_5)])
 
-    axis_left.set_xlabel(metric_label)
-    axis_left.set_ylabel("Country")
-    axis_right.set_xlabel(metric_label)
-    axis_right.set_ylabel("Country")
+    ax_left.set_title("Top 5 Countries")
+    ax_right.set_title("Bottom 5 Countries")
+    ax_left.set_xlabel(metric_label, fontsize=9)
+    ax_right.set_xlabel(metric_label, fontsize=9)
+    ax_left.set_ylabel("")
+    ax_right.set_ylabel("")
 
-    plt.tight_layout()
-    st.pyplot(fig, width="stretch")
+    # Value labels on bars
+    for ax in [ax_left, ax_right]:
+        for bar in ax.patches:
+            w = bar.get_width()
+            ax.text(
+                w + abs(w) * 0.01, bar.get_y() + bar.get_height() / 2,
+                f"{w:,.1f}", va="center", ha="left", fontsize=8, color="#374151",
+            )
+
+    fig.suptitle(metric_label, fontsize=10, color="#6b7280", y=1.01)
+    fig.tight_layout()
+    st.pyplot(fig)
+    plt.close(fig)
 
 
 def run() -> None:
     st.set_page_config(
         page_title="Okavango Forest Dashboard", page_icon="🌍", layout="wide"
     )
+    st.markdown(_CSS, unsafe_allow_html=True)
 
+    # ── Header ───────────────────────────────────────────────
     st.title("🌍 Global Forest & Land Dashboard")
-    st.caption(
-        "Interactive view of forest and land indicators by country using OWID and Natural Earth data."
-    )
+    st.caption("Interactive view of forest and land indicators using OWID + Natural Earth data.")
 
-    with st.spinner("Loading datasets and map layers..."):
+    # ── Data loading ─────────────────────────────────────────
+    with st.spinner("Loading datasets …"):
         data_manager = get_app_data_manager()
 
     dataset_map = _dataset_options()
 
-    st.sidebar.header("Controls")
-    selected_name = st.sidebar.selectbox("Choose dataset/map", list(dataset_map.keys()))
-    selected_file = dataset_map[selected_name]
-    raw_df = _load_raw_dataset(data_manager.download_dir, selected_file)
+    # ── Sidebar ───────────────────────────────────────────────
+    with st.sidebar:
+        st.markdown("## Controls")
+        selected_name = st.selectbox("Dataset", list(dataset_map.keys()), label_visibility="collapsed")
+        selected_file = dataset_map[selected_name]
+        raw_df = _load_raw_dataset(data_manager.download_dir, selected_file)
 
-    metric_column = _choose_dataset_metric(raw_df)
-    if metric_column is not None:
-        st.sidebar.caption(f"Metric in use: {metric_column}")
+        metric_column = _choose_dataset_metric(raw_df)
 
-    available_years = _available_years(raw_df, metric_column)
-    selected_year = None
-    if available_years:
-        selected_year = st.sidebar.selectbox("Choose year", available_years, index=0)
+        available_years = _available_years(raw_df, metric_column)
+        selected_year = None
+        if available_years:
+            selected_year = st.selectbox("Year", available_years, index=0)
+
+        st.divider()
+        if metric_column:
+            st.caption(f"Metric: **{metric_column}**")
+        if available_years:
+            st.caption(f"Latest data: **{available_years[0]}**")
+        st.caption("Source: Our World in Data + Natural Earth")
 
     selected_df = _build_map_dataframe(data_manager.world, raw_df, selected_year)
 
-    left_col, right_col = st.columns([3, 1])
+    # ── Map + Stats ───────────────────────────────────────────
+    map_col, stats_col = st.columns([4, 1], gap="medium")
 
-    with left_col:
-        st.subheader("Map")
-        st.caption("Displaying one selected map layer at a time.")
+    with map_col:
+        st.markdown(f"### {selected_name}")
         _plot_map(selected_df, metric_column)
 
-    with right_col:
-        st.subheader("Dataset Stats")
-        st.metric("Rows", f"{len(selected_df):,}")
-        st.metric("Columns", f"{selected_df.shape[1]:,}")
+    with stats_col:
+        st.markdown("### Stats")
+        st.metric("Countries", f"{len(selected_df):,}")
         if metric_column and metric_column in selected_df.columns:
             metric_series = pd.to_numeric(selected_df[metric_column], errors="coerce")
-            valid_count = metric_series.notna().sum()
-            st.metric("Countries with data", f"{int(valid_count):,}")
+            valid_count = int(metric_series.notna().sum())
+            st.metric("With data", f"{valid_count:,}")
             if valid_count:
-                st.metric(
-                    "Mean", _format_number(float(metric_series.mean(skipna=True)))
-                )
+                st.metric("Mean", _format_number(float(metric_series.mean(skipna=True))))
+                st.metric("Max", _format_number(float(metric_series.max(skipna=True))))
+                st.metric("Min", _format_number(float(metric_series.min(skipna=True))))
 
-        if available_years:
-            st.caption(f"Data freshness: latest year in selected dataset is {available_years[0]}.")
-        st.caption("Source: Our World in Data + Natural Earth")
+    st.divider()
 
-    st.subheader("Insights")
-    st.caption(
-        "Top and bottom countries by the selected metric (or computed annual change when possible)."
-    )
+    # ── Insights ─────────────────────────────────────────────
+    st.markdown("### Insights")
+    st.caption("Top and bottom countries by selected metric (or year-on-year change when available).")
 
     if metric_column is None:
-        st.dataframe(selected_df.describe(include="all"), width="stretch")
+        st.dataframe(selected_df.describe(include="all"), use_container_width=True)
         return
 
     country_column = _country_column(selected_df)
@@ -259,12 +307,10 @@ def run() -> None:
             st.warning("No valid values available for insights after handling missing data.")
             st.dataframe(
                 selected_df[[country_column, metric_column]].dropna().head(20),
-                width="stretch",
+                use_container_width=True,
             )
             return
         _plot_top_bottom_chart(insight_series, insight_label)
     except KeyError:
-        st.warning(
-            "Required columns are missing for charting. Showing summary statistics instead."
-        )
-        st.dataframe(selected_df.describe(include="all"), width="stretch")
+        st.warning("Required columns missing. Showing summary statistics instead.")
+        st.dataframe(selected_df.describe(include="all"), use_container_width=True)
