@@ -24,12 +24,41 @@ DATASET_FILES = {
 
 _CSS = """
 <style>
+    /* ── Layout ── */
     .block-container { padding-top: 1.2rem; padding-bottom: 1rem; }
+
+    /* ── Metric cards ── */
     [data-testid="metric-container"] {
+        background: #f0f9f0;
         border-left: 4px solid #16a34a;
         border-radius: 8px;
         padding: 0.75rem 1rem;
     }
+    [data-testid="metric-container"] label {
+        color: #374151 !important;
+        font-size: 0.78rem !important;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    [data-testid="metric-container"] [data-testid="stMetricValue"] {
+        color: #111827 !important;
+        font-size: 1.15rem !important;
+        font-weight: 700 !important;
+    }
+
+    /* ── Sidebar ── */
+    [data-testid="stSidebar"] {
+        background-color: #f8fdf8 !important;
+        border-right: 1px solid #d1fae5;
+    }
+
+    /* ── Headings ── */
+    h1 { color: #14532d !important; }
+    h2, h3 { color: #166534 !important; }
+
+    /* ── Divider ── */
+    hr { border-color: #d1fae5 !important; }
 </style>
 """
 
@@ -131,23 +160,30 @@ def _format_number(value: float) -> str:
 
 
 def _apply_chart_style(fig: plt.Figure, *axes: plt.Axes) -> None:
-    """Apply transparent backgrounds so charts work in light and dark mode."""
-    fig.patch.set_alpha(0.0)
+    """Apply fixed light backgrounds so charts look the same on every machine."""
+    fig.patch.set_facecolor("#ffffff")
+    fig.patch.set_alpha(1.0)
     for ax in axes:
-        ax.set_facecolor("none")
+        ax.set_facecolor("#f8fdf8")
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-        ax.tick_params(labelsize=9)
+        ax.spines["left"].set_color("#d1fae5")
+        ax.spines["bottom"].set_color("#d1fae5")
+        ax.tick_params(labelsize=9, colors="#374151")
+        ax.yaxis.label.set_color("#374151")
+        ax.xaxis.label.set_color("#374151")
         ax.title.set_fontsize(11)
         ax.title.set_fontweight("bold")
-        ax.grid(axis="x", alpha=0.3, linewidth=0.8, linestyle="--")
+        ax.title.set_color("#166534")
+        ax.grid(axis="x", color="#d1fae5", linewidth=0.8, linestyle="--")
         ax.set_axisbelow(True)
 
 
 def _plot_map(df: gpd.GeoDataFrame, metric_column: str | None) -> None:
     fig, axis = plt.subplots(figsize=(12, 6))
-    fig.patch.set_alpha(0.0)
-    axis.set_facecolor("#1e3a5f")  # dark ocean — looks good in both themes
+    fig.patch.set_facecolor("#ffffff")
+    fig.patch.set_alpha(1.0)
+    axis.set_facecolor("#cce8f4")  # light ocean blue — consistent on all machines
 
     if metric_column and metric_column in df.columns and df[metric_column].notna().any():
         df.plot(
@@ -195,10 +231,10 @@ def _plot_top_bottom_chart(series: pd.Series, metric_label: str) -> None:
             w = bar.get_width()
             ax.text(
                 w + abs(w) * 0.01, bar.get_y() + bar.get_height() / 2,
-                f"{w:,.1f}", va="center", ha="left", fontsize=8, color="#374151",
+                f"{w:,.1f}", va="center", ha="left", fontsize=8, color="#111827",
             )
 
-    fig.suptitle(metric_label, fontsize=10, color="#6b7280", y=1.01)
+    fig.suptitle(metric_label, fontsize=10, color="#374151", y=1.01)
     fig.tight_layout()
     st.pyplot(fig)
     plt.close(fig)

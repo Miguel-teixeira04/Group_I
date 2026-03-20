@@ -11,6 +11,7 @@ if str(_ROOT) not in sys.path:
 
 from app.image_loader import get_esri_tile
 from app.ollama_pipeline import load_config, describe_image, assess_risk, save_to_database
+from app.storage import check_existing
 
 _CSS = """
 <style>
@@ -177,25 +178,47 @@ def render_page():
     if run_clicked:
         config = load_config()
 
-        prog = st.progress(0, text="Downloading satellite image …")
-        image_path = get_esri_tile(latitude, longitude, zoom)
+        # Check if a result already exists in the database for these settings
+        cached = check_existing(latitude, longitude, zoom)
 
-        prog.progress(33, text=f"Analysing with **{config['image_model']['name']}** …")
-        image_description = describe_image(image_path, config)
+        if cached is not None:
+            st.info(
+                "Result already exists in the database for these settings. "
+                "Displaying cached result (no compute needed).",
+                icon="💾",
+            )
+            image_path = get_esri_tile(latitude, longitude, zoom)
+            st.session_state.result = {
+                "latitude": latitude,
+                "longitude": longitude,
+                "zoom": zoom,
+                "image_path": image_path,
+                "image_description": cached["image_description"],
+                "risk_result": {
+                    "danger": cached["danger"],
+                    "justification": cached["text_description"],
+                },
+            }
+        else:
+            prog = st.progress(0, text="Downloading satellite image …")
+            image_path = get_esri_tile(latitude, longitude, zoom)
 
-        prog.progress(66, text=f"Assessing risk with **{config['text_model']['name']}** …")
-        risk_result = assess_risk(image_description, config)
+            prog.progress(33, text=f"Analysing with **{config['image_model']['name']}** …")
+            image_description = describe_image(image_path, config)
 
-        save_to_database(latitude, longitude, zoom, image_description, risk_result, config)
-        prog.progress(100, text="Done!")
-        prog.empty()
+            prog.progress(66, text=f"Assessing risk with **{config['text_model']['name']}** …")
+            risk_result = assess_risk(image_description, config)
 
-        st.session_state.result = {
-            "latitude": latitude, "longitude": longitude, "zoom": zoom,
-            "image_path": image_path,
-            "image_description": image_description,
-            "risk_result": risk_result,
-        }
+            save_to_database(latitude, longitude, zoom, image_description, risk_result, config)
+            prog.progress(100, text="Done!")
+            prog.empty()
+
+            st.session_state.result = {
+                "latitude": latitude, "longitude": longitude, "zoom": zoom,
+                "image_path": image_path,
+                "image_description": image_description,
+                "risk_result": risk_result,
+            }
 
     # ── Results ───────────────────────────────────────────────
     if st.session_state.result:
