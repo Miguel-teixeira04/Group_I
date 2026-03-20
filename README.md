@@ -12,7 +12,6 @@ Miguel Teixeira   (56529@novasbe.pt)
 
 ## Project Structure
 
-```
 Group_I/
 ├── app/                   # Main application modules
 │   ├── data_loader.py     # Downloads datasets
@@ -30,7 +29,6 @@ Group_I/
 ├── models.yaml            # AI model configuration
 ├── main.py                # App entry point
 └── requirements.txt
-```
 
 ---
 
