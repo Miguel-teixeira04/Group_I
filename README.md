@@ -85,7 +85,7 @@ On first launch, the app will automatically download all required datasets into 
 ### 5. Running Tests
 
 ```bash
-pytest
+python -m pytest tests/ -v
 ```
 
 ---
