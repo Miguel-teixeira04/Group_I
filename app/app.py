@@ -3,8 +3,10 @@ from __future__ import annotations
 import os
 from typing import Dict, Tuple
 
-import geopandas as gpd
+import matplotlib
+matplotlib.use("Agg")  # to run on mac
 import matplotlib.pyplot as plt
+import geopandas as gpd
 import pandas as pd
 import streamlit as st
 
