@@ -12,6 +12,7 @@ Miguel Teixeira   (56529@novasbe.pt)
 
 ## Project Structure
 
+```text
 Group_I/
 ├── app/                   # Main application modules
 │   ├── data_loader.py     # Downloads datasets
@@ -29,7 +30,7 @@ Group_I/
 ├── models.yaml            # AI model configuration
 ├── main.py                # App entry point
 └── requirements.txt
-
+```
 ---
 
 ## About the Project
@@ -40,7 +41,6 @@ It addresses the following UN Sustainable Development Goals (SDGs):
 
 - **SDG 15 — Life on Land**: Monitoring deforestation, land degradation, and protected areas
 - **SDG 13 — Climate Action**: Tracking annual forest area changes as a climate indicator
-- **SDG 11 — Sustainable Cities and Communities**: Identifying urban sprawl and land use change via satellite imagery
 
 ---
 
@@ -71,13 +71,13 @@ On first launch, the app will automatically download all required datasets into 
 
 ## Examples
 
-### Example 1 — Amazon Rainforest Region
+### Example 1 
 
 
-### Example 2 — Urban Expansion Area
+### Example 2 
 
 
-### Example 3 — Protected Forest Area
+### Example 3
 
 ---
 
