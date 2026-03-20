@@ -7,10 +7,18 @@ from pathlib import Path
 _ROOT = Path(__file__).resolve().parent.parent
 
 # --- Tile math ---
+_MAX_LAT = 90 # Web Mercator upper limit (avoids division-by-zero at ±90°)
+
 def lat_lon_to_tile(lat, lon, zoom):
+    # Clamp to valid Web Mercator range so cos(lat) never reaches 0
+    lat = max(-_MAX_LAT, min(_MAX_LAT, lat))
     n = 2 ** zoom
     x = int((lon + 180) / 360 * n)
-    y = int((1 - math.log(math.tan(math.radians(lat)) + 1 / math.cos(math.radians(lat))) / math.pi) / 2 * n)
+    lat_rad = math.radians(lat)
+    y = int((1 - math.log(math.tan(lat_rad) + 1 / math.cos(lat_rad)) / math.pi) / 2 * n)
+    # Clamp tile indices to valid range
+    x = max(0, min(n - 1, x))
+    y = max(0, min(n - 1, y))
     return x, y, zoom
 
 # --- Path builder (creates folder if needed) ---
