@@ -25,32 +25,11 @@ DATASET_FILES = {
 _CSS = """
 <style>
     .block-container { padding-top: 1.2rem; padding-bottom: 1rem; }
-
-    /* Metric cards */
     [data-testid="metric-container"] {
-        background: #f0fdf4;
         border-left: 4px solid #16a34a;
         border-radius: 8px;
         padding: 0.75rem 1rem;
     }
-
-    /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background: #f0fdf4;
-        border-right: 1px solid #bbf7d0;
-    }
-    section[data-testid="stSidebar"] h1,
-    section[data-testid="stSidebar"] h2,
-    section[data-testid="stSidebar"] h3 {
-        color: #14532d;
-    }
-
-    /* Page title */
-    h1 { color: #14532d; letter-spacing: -0.5px; }
-    h2, h3 { color: #166534; }
-
-    /* Divider */
-    hr { border-color: #d1fae5; margin: 1rem 0; }
 </style>
 """
 
@@ -152,27 +131,23 @@ def _format_number(value: float) -> str:
 
 
 def _apply_chart_style(fig: plt.Figure, *axes: plt.Axes) -> None:
-    """Apply consistent clean styling to matplotlib figures."""
-    fig.patch.set_facecolor("white")
+    """Apply transparent backgrounds so charts work in light and dark mode."""
+    fig.patch.set_alpha(0.0)
     for ax in axes:
-        ax.set_facecolor("#f9fafb")
+        ax.set_facecolor("none")
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-        ax.spines["left"].set_color("#d1d5db")
-        ax.spines["bottom"].set_color("#d1d5db")
-        ax.tick_params(colors="#4b5563", labelsize=9)
-        ax.xaxis.label.set_color("#374151")
-        ax.yaxis.label.set_color("#374151")
-        ax.title.set_color("#111827")
+        ax.tick_params(labelsize=9)
         ax.title.set_fontsize(11)
         ax.title.set_fontweight("bold")
-        ax.grid(axis="x", color="#e5e7eb", linewidth=0.8, linestyle="--")
+        ax.grid(axis="x", alpha=0.3, linewidth=0.8, linestyle="--")
         ax.set_axisbelow(True)
 
 
 def _plot_map(df: gpd.GeoDataFrame, metric_column: str | None) -> None:
-    fig, axis = plt.subplots(figsize=(12, 6), facecolor="white")
-    axis.set_facecolor("#dbeafe")  # light ocean blue
+    fig, axis = plt.subplots(figsize=(12, 6))
+    fig.patch.set_alpha(0.0)
+    axis.set_facecolor("#1e3a5f")  # dark ocean — looks good in both themes
 
     if metric_column and metric_column in df.columns and df[metric_column].notna().any():
         df.plot(

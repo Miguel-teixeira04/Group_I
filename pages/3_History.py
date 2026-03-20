@@ -168,8 +168,8 @@ def render_page():
                 m1.metric("Vision model", row["image_model"])
                 m2.metric("Text model",   row["text_model"])
 
-                with st.expander("Full image description"):
-                    st.write(row["image_description"])
+                st.markdown("**Full image description**")
+                st.caption(row["image_description"])
 
 
 render_page()
