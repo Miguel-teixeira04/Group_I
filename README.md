@@ -94,29 +94,41 @@ pytest
 
 Below are three examples where the AI pipeline successfully identified areas at environmental risk.
 
-### Example 1 — Amazon Deforestation (S 10.00000, W 60.00000)
+---
 
-**Coordinates:** S 10.00000, W 60.00000 | **Zoom:** 15 | **Result: At Risk**
+### Example 1 — Amazon Region, Brazil (S 6.00°, W 55.00°, Zoom 8)
 
-![Example 1 — Amazon deforestation](docs/example1.png)
+![Amazon Region](images/esri_8_88_132.png)
 
-The vision model described a mix of natural and human-made features, identifying cleared land with exposed soil bordering dense tropical vegetation. The risk assessment model flagged the area as **at environmental risk**, citing evidence of deforestation that can lead to soil erosion, loss of biodiversity, and contribute to climate change.
+**Environmental Risk Detected**
 
-### Example 2 — Amazon Basin (S 6.00000, W 55.00000)
+**Image Description (AI):** The image shows a satellite view of a landscape with shades of green indicating vegetation and brown representing bare ground. Deforestation is visible in the form of large cleared areas where vegetation has been removed, creating a stark contrast between surrounding greenery and bare earth. Roads and pathways cut through the vegetation, and urban areas with denser concentrations of buildings are visible.
 
-**Coordinates:** S 6.00000, W 55.00000 | **Zoom:** 8 | **Result: At Risk**
+**Model Justification:** Deforestation is visible in multiple areas, indicating potential loss of habitat for wildlife and increased soil erosion. Urban sprawl also suggests human encroachment on natural habitats.
 
-![Example 2 — Amazon basin deforestation](docs/example2.png)
+---
 
-At a broader zoom level, the vision model identified dominant shades of green with visible patches of clearing across the landscape. The text model flagged this as **at environmental risk**, noting that deforestation is visible in multiple areas, indicating potential loss of habitat for wildlife and increased carbon emissions from forest clearing.
+### Example 2 — Sahel Region, Africa (N 13.50°, E 14.00°, Zoom 15)
 
-### Example 3 — Lake Chad Region (N 13.50000, E 14.00000)
+![Sahel Region](images/esri_15_17658_15143.png)
 
-**Coordinates:** N 13.50000, E 14.00000 | **Zoom:** 15 | **Result: At Risk**
+**Environmental Risk Detected**
 
-![Example 3 — Lake Chad desertification](docs/example3.png)
+**Image Description (AI):** The image shows a mix of water bodies, vegetation, and urban development. There are areas where the vegetation appears to have been cleared or burned, indicated by brown patches amidst the greenery. Urban areas are scattered throughout, with roads and buildings visible near water bodies.
 
-The satellite image shows a semi-arid area mixing natural features and human-made structures. The vision model identified brown patches amidst green areas, suggesting potential land degradation. The risk assessment model flagged the area as **at environmental risk**, highlighting the contrast between arid and vegetated zones as indicative of advancing desertification and environmental stress in the Lake Chad region.
+**Model Justification:** Although there is no clear evidence of deforestation, the brown patches amidst the green suggest potential clearing or burning of vegetation. The presence of urban development near water bodies indicates possible impacts on biodiversity and water pollution. The balance between natural and human-made environments suggests ongoing environmental change due to human activity.
+
+---
+
+### Example 3 — Rondônia, Brazil (S 11.00°, W 62.00°, Zoom 15)
+
+![Rondônia Brazil](images/esri_15_10740_17392.png)
+
+**Environmental Risk Detected**
+
+**Image Description (AI):** The image shows a satellite view with a central forested area with healthy tree cover, but to the right there is a clear boundary where land cover changes to a more open landscape with patterns of agricultural fields or pastures. In the lower left corner, a small body of water is surrounded by cleared land, showing a patchwork of different land cover types including areas with no vegetation at all, suggesting recent clearing.
+
+**Model Justification:** The image shows signs of deforestation in the lower left corner and agricultural expansion towards the right side, indicating potential loss of biodiversity. The patchwork of different land cover types suggests recent clearing. The presence of cleared land around the water body indicates possible urban sprawl or development.
 
 ---
 
@@ -124,12 +136,12 @@ The satellite image shows a semi-arid area mixing natural features and human-mad
 
 This project directly contributes to several of the [United Nations Sustainable Development Goals](https://sdgs.un.org/goals):
 
-**SDG 15 — Life on Land.** The core of this project is monitoring terrestrial ecosystems. By tracking annual changes in forest area, deforestation rates, shares of protected and degraded land, and forest cover percentages, the tool provides a comprehensive view of the state of the world's land ecosystems. The AI satellite analysis adds a ground-truth layer — enabling users to verify whether specific areas show signs of deforestation, land degradation, or habitat loss. This directly supports Target 15.1 (conservation of terrestrial ecosystems), Target 15.2 (sustainable management of forests), and Target 15.3 (combating desertification and restoring degraded land).
+The most direct connection is to **SDG 15 — Life on Land**, which calls for the protection, restoration, and sustainable use of terrestrial ecosystems. Our tool monitors deforestation, land degradation, and the share of protected land across the globe using the most recent data available. By combining these datasets with AI-powered satellite image analysis, the app enables users to identify at-risk regions in near real time, providing a practical instrument for conservation efforts. This directly supports Target 15.1 (conservation of terrestrial ecosystems), Target 15.2 (sustainable management of forests), and Target 15.3 (combating desertification and restoring degraded land).
 
-**SDG 13 — Climate Action.** Forests are the planet's largest terrestrial carbon sink. Monitoring deforestation and forest area changes is critical for understanding carbon cycle disruptions. This tool makes it possible for researchers, NGOs, and policymakers to quickly identify hotspots of forest loss — areas where carbon sequestration capacity is being actively destroyed. By making this data accessible through an interactive dashboard, the project supports informed climate action and evidence-based policy decisions.
+The project also contributes to **SDG 13 — Climate Action**. Forests are critical carbon sinks, and their destruction accelerates climate change. By tracking annual changes in forest area and flagging areas of deforestation, our tool helps raise awareness of one of the key drivers of global warming. Early identification of deforested zones can support policymakers and environmental organisations in taking timely corrective action.
 
-**SDG 6 — Clean Water and Sanitation.** The satellite analysis capability can detect water body changes, pollution, and watershed degradation. The Aral Sea example above illustrates how the tool can flag areas where water resources have been catastrophically depleted — information that is vital for water security planning and sustainable water management.
+Additionally, the project is closely linked to **SDG 6 — Clean Water and Sanitation**. Deforestation and land degradation have a direct impact on water quality and availability. Forests play a critical role in regulating water cycles, filtering rainwater, and preventing soil erosion that leads to river and lake contamination. By monitoring land degradation and deforestation across the globe, our tool helps identify regions where water resources may be under threat, supporting early intervention before irreversible damage occurs.
 
-**SDG 14 — Life Below Water.** While the primary focus is terrestrial, coastal deforestation (such as mangrove destruction) directly impacts marine ecosystems. The satellite analysis can identify coastal areas where protective mangrove forests have been removed, increasing sedimentation and runoff that damages coral reefs and marine habitats.
+Finally, **SDG 14 — Life Below Water.** While the primary focus is terrestrial, coastal deforestation (such as mangrove destruction) directly impacts marine ecosystems. The satellite analysis can identify coastal areas where protective mangrove forests have been removed, increasing sedimentation and runoff that damages coral reefs and marine habitats.
 
-In summary, this project serves as a proof-of-concept for how combining open environmental data with AI-powered satellite analysis can support evidence-based environmental monitoring at a global scale. By lowering the technical barrier to accessing and interpreting environmental data, tools like this can empower a broader range of stakeholders — from students and researchers to local authorities and international organizations — to take informed action toward sustainable development.
+In summary, this project serves as a proof-of-concept for how combining open environmental data with AI-powered satellite analysis can support evidence-based environmental monitoring at a global scale. By lowering the technical barrier to accessing and interpreting environmental data, tools like this can empower a broader range of stakeholders, such as students and researchers to local authorities and international organizations, to take informed action toward sustainable development.
